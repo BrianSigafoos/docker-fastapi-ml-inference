@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout with Git LFS
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+
+      - name: Install dependencies for CI testing
+        run: poetry install --without dev
+
+      - name: Lint
+        uses: psf/black@stable
+        with:
+          jupyter: true
+
+      - name: Test
+        run: PYTHON_ENV=test poetry run pytest

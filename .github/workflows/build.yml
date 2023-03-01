@@ -1,0 +1,44 @@
+# Build image from every merge to main (concurrency 1) or with a build tag.
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - build/**
+
+env:
+  # Use this env to make sure it is downcased since Github Actions doesn't support
+  # downcasing themselves, yet.
+  FULL_IMAGE_NAME: ghcr.io/briansigafoos/docker-fastapi-ml-inference
+
+# When merging multiple Dependabot PR's in a row, only build the last one
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout with Git LFS
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      # Pull from git lfs
+      - name: Pull from git lfs
+        run: git lfs pull
+
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          package: ${{ env.FULL_IMAGE_NAME }}

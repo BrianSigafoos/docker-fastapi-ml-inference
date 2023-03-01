@@ -35,13 +35,13 @@ First push up for the new package repository
 
 ```shell
 docker login ghcr.io --username <USERNAME>
-# Then enter token
+# Then enter personal access token with access to write to GitHub Container Registry
 
 # Then build
-DOCKER_BUILDKIT=1 docker build . -t ghcr.io/BrianSigafoos/docker-fastapi-ml-inference:first_push
+DOCKER_BUILDKIT=1 docker build . -t ghcr.io/briansigafoos/docker-fastapi-ml-inference:first_push
 
 # Then push
-docker push ghcr.io/BrianSigafoos/docker-fastapi-ml-inference:first_push
+docker push ghcr.io/briansigafoos/docker-fastapi-ml-inference:first_push
 ```
 
 ## Development
