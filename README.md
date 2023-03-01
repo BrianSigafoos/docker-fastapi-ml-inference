@@ -20,13 +20,13 @@ Demo app for FastAPI for machine learning inference on Docker. Deployable to Kub
 
 ```bash
 DATE=$(date +%Y%m%d-%H%M%S)
-DOCKER_BUILDKIT=1 docker build . -t demo_fastapi/ml:$DATE --build-arg PYTHON_ENV=development
+DOCKER_BUILDKIT=1 docker build . -t briansigafoos/docker-fastapi-ml-inference:$DATE --build-arg PYTHON_ENV=development
 
 # View FastAPI docs in browser at http://0.0.0.0:80/docs
-docker run -p 80:80 demo_fastapi/ml:$DATE
+docker run -p 80:80 briansigafoos/docker-fastapi-ml-inference:$DATE
 
 # Run in bash
-docker run --rm -i -t demo_fastapi/ml:$DATE bash
+docker run --rm -i -t briansigafoos/docker-fastapi-ml-inference:$DATE bash
 ```
 
 ### First time setup
