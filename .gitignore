@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Custom
+tmp/
+
+.data/
+data/
+*.csv
+
+# For Kubernetes secrets
+.env.production.local
