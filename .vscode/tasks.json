@@ -1,0 +1,77 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "black autocorrect file",
+      "type": "shell",
+      "command": "poetry run black ${relativeFile}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "black autocorrect",
+      "type": "shell",
+      "command": "poetry run black .",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "local uvicorn server",
+      "type": "shell",
+      "command": "PYTHON_ENV=development poetry run uvicorn app.main:app --reload",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "autocorrect",
+      "type": "shell",
+      "command": "poetry run isort app tests; poetry run black .",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "isort autocorrect",
+      "type": "shell",
+      "command": "poetry run isort app tests",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "pytest file",
+      "type": "shell",
+      "command": "PYTHON_ENV=test poetry run pytest ${relativeFile}",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "pytest",
+      "type": "shell",
+      "command": "PYTHON_ENV=test poetry run pytest",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+  ]
+}
