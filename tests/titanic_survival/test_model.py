@@ -42,5 +42,5 @@ def test_predict():
     assert predictions[0]["score"] >= 0.90
 
     assert predictions[1]["passenger_id"] == p2["PassengerId"]
-    assert predictions[1]["survived"] == True
+    assert predictions[1]["survived"] == False
     assert predictions[1]["score"] <= 0.10
