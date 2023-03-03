@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: demo-fastapi-ml
+
+  labels:
+    app: demo-fastapi
+
+# https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#deploymentspec-v1-apps
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: demo-fastapi
+
+  template:
+    metadata:
+      labels:
+        app: demo-fastapi
+        # Set by kubernetes/overlays/$K8s_ENV/revision-sha-ml-replacement.yaml
+        app_revision: notyetset
+
+    spec:
+      securityContext:
+        # Must match Dockerfile's USER_ID for User and Group
+        runAsUser: 1001
+        runAsGroup: 1001
+        # Set ownership of mounted volumes to the user running the container
+        fsGroup: 1001
+
+      # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core
+      containers:
+        - name: demo-fastapi-ml-container
+          image: ghcr.io/briansigafoos/docker-rails-webpacker-app
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+
+          resources:
+            requests:
+              cpu: 20m
+              memory: 200Mi
+            limits:
+              cpu: 200m
+              memory: 500Mi
+
+          # Pass k8s metadata to containers. Can be used to tag requests.
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            # Health_check endpoint
+            - name: APP_REVISION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app_revision']
+            # See TMPDIR comment below
+            - name: TMPDIR
+              value: /app/tmp/tmp
+
+          envFrom:
+            - secretRef:
+                name: demo-fastapi-ml-secrets
+            - configMapRef:
+                name: demo-fastapi-ml-config
+
+          # Naming port so that probes and service can reference it.
+          ports:
+            - name: ml-pod-port
+              containerPort: 80 # http port, same as in Dockerfile
+
+          livenessProbe:
+            httpGet:
+              path: /health_check/load_balancer
+              port: ml-pod-port
+            periodSeconds: 10
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /health_check/load_balancer
+              port: ml-pod-port
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+
+          volumeMounts:
+            # Since the container file system is read-only, we need to mount this.
+            - name: app-tmp
+              mountPath: /app/tmp
+
+      # Needed for tmp folder to be writable by the container.
+      initContainers:
+        - name: make-tempfile-directory
+          image: busybox:1.33
+          # This new tmp folder must match TMPDIR env var above.
+          command: ["sh", "-c", "mkdir /app/tmp/tmp"]
+          volumeMounts:
+            - name: app-tmp
+              mountPath: /app/tmp
+
+      # Use podAntiAffinity to distribute this pod across nodes before adding
+      # more to the same node.
+      # https://stackoverflow.com/questions/41159843/kubernetes-pod-distribution-amongst-nodes
+      # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                      - demo-fastapi
+                topologyKey: kubernetes.io/hostname
+
+      imagePullSecrets:
+        - name: ghcr-k8s-pull
+
+      volumes:
+        - name: app-tmp
+          emptyDir: {}

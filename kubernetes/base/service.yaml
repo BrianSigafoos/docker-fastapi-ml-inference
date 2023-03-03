@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+
+# Access this service via the DNS name: `http://demo-fastapi-ml-service-prod`
+# Debug with `kubectl get svc `
+metadata:
+  name: demo-fastapi-ml-service
+
+  labels:
+    app: demo-fastapi
+
+# https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#service-v1-core
+spec:
+  type: ClusterIP # default
+
+  selector:
+    app: demo-fastapi
+
+  ports:
+    - port: 80
+      targetPort: ml-pod-port # 8000
+      # protocol: TCP # default
+      # name: <ml-pod-port> # not needed since only 1 port

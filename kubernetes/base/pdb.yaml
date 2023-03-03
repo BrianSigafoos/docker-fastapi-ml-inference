@@ -1,0 +1,15 @@
+#
+# https://kubernetes.io/docs/concepts/workloads/pods/disruptions/#pod-disruption-budgets
+# https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+#
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+
+metadata:
+  name: demo-fastapi-ml-pdb
+
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: demo-fastapi

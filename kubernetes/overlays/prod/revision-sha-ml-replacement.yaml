@@ -1,0 +1,15 @@
+# Copy the SHA from the image to the Kubernetes metadata label, for env var
+source:
+  kind: Deployment
+  name: demo-fastapi-ml
+  fieldPath: spec.template.spec.containers.0.image
+  options:
+    delimiter: ':'
+    index: 1
+targets:
+  - select:
+      kind: Deployment
+    fieldPaths:
+      - spec.template.metadata.labels.app_revision
+    options:
+      create: true
