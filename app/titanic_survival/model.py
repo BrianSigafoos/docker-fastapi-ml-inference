@@ -4,6 +4,7 @@ import joblib
 import pandas as pd
 
 TITANIC_MODEL_VERSION = 20230228
+MODEL_THRESHOLD = 0.5
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent
 
@@ -43,7 +44,7 @@ def predict(passengers):
     return [
         {
             "passenger_id": passenger_id,
-            "survived": bool(score),
+            "survived": bool(score > MODEL_THRESHOLD),
             "score": round(score, 3),
         }
         for passenger_id, score in zip(passenger_ids, y_pred)
