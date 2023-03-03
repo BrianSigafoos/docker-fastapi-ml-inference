@@ -2,6 +2,8 @@
 
 Demo app for FastAPI for machine learning inference on Docker. Deployable to Kubernetes.
 
+Check out my [blog post](https://briansigafoos.com/ml-fast-api/) for more.
+
 ## Process for adding a new machine learning model
 
 - Add a project to the root folder
