@@ -1,0 +1,51 @@
+# For a prod deployment.
+# https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
+#
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: demo-fastapi
+
+nameSuffix: -prod
+
+resources:
+- ../../base
+
+# Overwritten by deploy Github Action: kustomize edit set image "${{inputs.image}}"
+# If applying manually, UPDATE to a latest or new SHA in newTag below.
+images:
+- name: ghcr.io/briansigafoos/docker-rails-webpacker-app
+  newTag: "TBD"
+
+# Control the number of replicas in prod
+# 1 per AZ (subnet) thanks to antiAffinity rules
+replicas:
+- count: 1
+  name: demo-fastapi-ml
+
+replacements:
+  - path: revision-sha-ml-replacement.yaml
+
+patches:
+- path: deployment-label-patch.yaml
+  target:
+    kind: Deployment
+    name: demo-fastapi-ml
+
+- path: service-label-patch.yaml
+  target:
+    kind: Service
+    name: demo-fastapi-ml-service
+
+- path: pdb-app-patch.yaml
+  target:
+    kind: PodDisruptionBudget
+    name: demo-fastapi-ml-pdb
+
+configMapGenerator:
+- envs:
+  - config-map-prod.env
+  name: demo-fastapi-ml-config
+
+generatorOptions:
+  disableNameSuffixHash: true
